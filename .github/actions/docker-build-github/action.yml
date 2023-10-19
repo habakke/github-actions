@@ -32,7 +32,7 @@ runs:
         tags: |
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
-          type=raw,value={{github.sha}},enable=${{ github.ref_type != 'tag' }}
+          type=raw,value={{github.sha}}
           type=raw,value=latest,enable={{is_default_branch}}
           type=raw,value=latest-{{branch}},enable=${{ github.ref_type == 'branch' }}
 
