@@ -32,7 +32,6 @@ runs:
         tags: |
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
-          type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
           type=raw,value={{github.sha}},enable=${{ github.ref_type != 'tag' }}
 
     - name: Set up Docker Buildx to enable caching
@@ -46,7 +45,7 @@ runs:
         cache-to: type=gha,mode=max
         file: ${{ inputs.dockerfile }}
         push: true
-        tags: ${{ steps.metadata.outputs.tags }}
+        tags: ${{ steps.metadata.outputs.tags }},${{ inputs.image_name }}:latest
         labels: ${{ steps.metadata.outputs.labels }}
 
     - name: Generate job summary
