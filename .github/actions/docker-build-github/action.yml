@@ -33,19 +33,21 @@ runs:
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
           type=raw,value={{github.sha}},enable=${{ github.ref_type != 'tag' }}
+          type=raw,value=latest,enable={{is_default_branch}}
+          type=raw,value=latest-{{branch}},enable=${{ github.ref_type == 'branch' }}
 
     - name: Set up Docker Buildx to enable caching
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
     - name: Build and push Docker image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       with:
         context: .
         cache-from: type=gha
         cache-to: type=gha,mode=max
         file: ${{ inputs.dockerfile }}
         push: true
-        tags: ${{ steps.metadata.outputs.tags }},${{ inputs.image_name }}:latest
+        tags: ${{ steps.metadata.outputs.tags }}
         labels: ${{ steps.metadata.outputs.labels }}
 
     - name: Generate job summary
