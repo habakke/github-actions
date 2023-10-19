@@ -32,16 +32,7 @@ runs:
         tags: |
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
-          type=raw,value={{github.sha}}
-#          type=raw,value=latest,enable={{is_default_branch}}
-#          type=raw,value={{branch}}-latest,enable=${{ github.ref_type == 'branch' }}
-#          type=raw,value={{tag}},enable=${{ github.ref_type == 'tag' }}
-
-    - name: Debug tags
-      shell: bash
-      run: |
-          echo "tags: ${{ steps.metadata.outputs.tags }}"
-          echo "labels: ${{ steps.metadata.outputs.labels }}"
+          type=raw,value={{github.sha}},enable=${{ github.ref_type != 'tag' }}
 
     - name: Set up Docker Buildx to enable caching
       uses: docker/setup-buildx-action@v3
