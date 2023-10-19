@@ -39,7 +39,7 @@ runs:
       run: |
         echo "TAGS: ${{ steps.metadata.outputs.tags }}\n\r"
         echo "LABELS: ${{ steps.metadata.outputs.labels }}\n\r"
-        exit 1
+        exit 0
 
     - name: Set up Docker Buildx to enable caching
       uses: docker/setup-buildx-action@v3
