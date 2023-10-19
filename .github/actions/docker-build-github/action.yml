@@ -37,8 +37,8 @@ runs:
     - name: Debug tags
       shell: bash
       run: |
-        echo "TAGS: ${{ steps.metadata.outputs.tags }}\n"
-        echo "LABELS: ${{ steps.metadata.outputs.labels }}\n"
+        echo "TAGS: ${{ steps.metadata.outputs.tags }}"
+        echo "LABELS: ${{ steps.metadata.outputs.labels }}"
 
 #    - name: Set up Docker Buildx to enable caching
 #      uses: docker/setup-buildx-action@v3
