@@ -3,9 +3,15 @@ description: Builds and pushes a docker image to a Github hosted docker reposito
 author: "habakke@matrise.net"
 
 inputs:
+  repository:
+    required: true
+    description: The repository to deploy to
   image_name:
     required: true
     description: Name of docker image to build and publish
+  tag:
+    required: false
+    description: Optional tag to apply to the docker image
   dockerfile:
     required: true
     default: ./Dockerfile
@@ -32,10 +38,11 @@ runs:
       id: metadata
       uses: docker/metadata-action@v5
       with:
-        images: ${{ inputs.image_name }}
+        images: ${{ inputs.repository }}/${{ inputs.image_name }}
         tags: |
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
+          type=raw,value=${{ inputs.tag }},enable=${{ inputs.tag != '' }}
           type=raw,value=latest,enable={{is_default_branch}}
           type=sha,enable=true,priority=100,prefix=,suffix=,format=long
 
@@ -68,7 +75,7 @@ runs:
       run: |
         echo "Built docker image:" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
-        echo "- Name: ${{ inputs.image_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Name:  ${{ inputs.repository }}/${{ inputs.image_name }}" >> $GITHUB_STEP_SUMMARY        
         echo "- TAGS: ${{ steps.metadata.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
         echo "- LABELS: ${{ steps.metadata.outputs.labels }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line

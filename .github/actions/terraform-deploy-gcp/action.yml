@@ -89,6 +89,7 @@ runs:
       shell: bash
       run: |
         terraform plan -out terraform.plan
+        terraform show -no-color terraform.plan > terraform.plan.txt
       continue-on-error: true
 
     - name: Pull Request Comment
