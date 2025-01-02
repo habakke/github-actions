@@ -76,7 +76,7 @@ runs:
         SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
       uses: docker/build-push-action@v6
       with:
-        context: .
+        context: ${{ inputs.context }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
         file: ${{ inputs.dockerfile }}
