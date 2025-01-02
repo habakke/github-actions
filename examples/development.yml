@@ -1,15 +1,14 @@
 name: Development pipeline
 on:
-#  push:
-#    branches:
-#      - master
-#      - main
-#    tags:
-#      - 'v[0-9]+.[0-9]+.[0-9]+'
   pull_request:
     branches:
       - '*'
   workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
+        description: Environment to run against
+        required: true
 
 jobs:
   docker-build:
@@ -19,12 +18,20 @@ jobs:
       contents: read
       id-token: write
     outputs:
-      tags: ${{ env.DOCKER_METADATA_OUTPUT_TAGS }}
+      tags: ${{ steps.metadata.outputs.tags }}
+      image: ${{ steps.build.outputs.image }}
+      dockerfile: ${{ steps.build.outputs.dockerfile }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      - uses: habakke/github-actions/.github/actions/docker-build-github@master
+        uses: actions/checkout@v4
+      - uses: habakke/github-actions/.github/actions/auth-github@v1
+        id: auth-github
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: habakke/github-actions/.github/actions/docker-build@v1
+        id: build
+        with:
+          repository: ${{ vars.DOCKER_REPO }}
           image_name: ${{ vars.DOCKER_IMAGE }}
           dockerfile: ./Dockerfile
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -39,16 +46,21 @@ jobs:
       id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set Terraform variables
         shell: bash
         run: |
           echo "TF_VAR_project_id=${{ vars.DEPLOY_PROJECT_ID }}" >> $GITHUB_ENV
           echo "TF_VAR_environment=development" >> $GITHUB_ENV
           echo "TF_VAR_container=${{ needs.docker-build.outputs.tags }}" >> $GITHUB_ENV
+      - uses: habakke/github-actions/.github/actions/auth-gcp@master
+        id: auth-gcp
+        with:
+          repository: ${{ vars.DOCKER_REPO }}
+          service_account_key: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
       - uses: habakke/github-actions/.github/actions/terraform-deploy-gcp@master
         with:
           directory: ./deploy/development
+          repository: ${{ vars.DOCKER_REPO }}
           service_account_key: ${{ vars.DEPLOY_SERVICE_ACCOUNT_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          deploy_on_pull: true
+          token: ${{ secrets.GITHUB_TOKEN }}

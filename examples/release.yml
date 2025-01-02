@@ -5,10 +5,8 @@ on:
       version:
         description: Release version (v0.0.0)
         required: true
-      pre_release:
-        type: boolean
-        default: false
-        description: Pre-release?
+
+run-name: Release ${{ inputs.version }}
 
 jobs:
   release:
@@ -16,9 +14,8 @@ jobs:
     environment: production
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      - uses: habakke/github-actions/.github/actions/release@master
+        uses: actions/checkout@v4
+      - uses: habakke/github-actions/.github/actions/release@v1
         with:
           version: ${{ inputs.VERSION }}
-          pre_release: ${{ inputs.PRE_RELEASE }}
           github_token: ${{ secrets.GITHUB_TOKEN }}

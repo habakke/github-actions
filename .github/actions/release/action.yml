@@ -10,6 +10,15 @@ inputs:
     type: boolean
     default: false
     description: Pre-release?
+  jira_webhook:
+    required: false
+    description: The Jira webhook URL
+  jira_artifact_name:
+    required: false
+    description: The name of the component to release
+  jira_project_key:
+    required: false
+    description: The jira project key (given issues in project named TEST-123, TEST is the key)
   github_token:
     required: false
     description: The secrets.GITHUB_TOKEN
@@ -18,7 +27,7 @@ runs:
   using: "composite"
   steps:
     - name: Create release
-      uses: "actions/github-script@v6"
+      uses: actions/github-script@v7
       with:
         github-token: ${{ inputs.GITHUB_TOKEN }}
         script: |
@@ -38,3 +47,10 @@ runs:
           } catch (error) {
             core.setFailed(error.message);
           }
+    - name: Create Jira release
+      if: inputs.jira_project_key != null
+      uses: GeoWerkstatt/create-jira-release@v1
+      with:
+        jira-project-key: ${{ inputs.jira_project_key }}
+        jira-automation-webhook: ${{ inputs.jira_webhook }}
+        build-version: ${{ inputs.jira_artifact_name }}-${{ inputs.version }}
