@@ -16,6 +16,10 @@ inputs:
   tag:
     required: false
     description: Optional tag to apply to the docker image
+  context:
+    required: false
+    description: The build context
+    default: .
   dockerfile:
     required: true
     default: ./Dockerfile
@@ -62,21 +66,26 @@ runs:
         cat ${{ inputs.dockerfile }}
         echo ########################################
 
+    - name: Get Git commit timestamps
+      shell: bash
+      run: echo "TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
+
     - name: Build and push Docker image
       env:
         TOKEN:  ${{ inputs.TOKEN }}
-      uses: docker/build-push-action@v5
+        SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
+      uses: docker/build-push-action@v6
       with:
         context: .
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        build-args: |
-          TOKEN=${{ inputs.token }}
         file: ${{ inputs.dockerfile }}
         push: ${{ inputs.push_image }}
         tags: ${{ steps.metadata.outputs.tags }}
         labels: ${{ steps.metadata.outputs.labels }}
         annotations: ${{ steps.meta.outputs.annotations }}
+        build-args: |
+          TOKEN=${{ inputs.token }}
 
     - name: Generate job summary
       shell: bash
