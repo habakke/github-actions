@@ -1,0 +1,51 @@
+name: Run tests in a Docker container
+description: Runs tests inside a Docker container
+author: "habakke@matrise.net"
+
+inputs:
+  platforms:
+    required: false
+    description: Platforms to build the image for
+    default: linux/amd64
+  dockerfile:
+    required: true
+    default: ./Dockerfile
+    description: The docker file to use when building the image
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup gcloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx to enable caching
+      uses: docker/setup-buildx-action@v3
+
+    - name: Cache Go build and mod cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Get Git commit timestamps
+      shell: bash
+      run: echo "TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
+
+    - name: Run tests
+      env:
+        SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache
+        file: ${{ inputs.dockerfile }}
+        platforms: ${{ inputs.platforms }}
+        push: false
+        tags: test
