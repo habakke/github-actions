@@ -98,7 +98,7 @@ runs:
       with:
         context: ${{ inputs.context }}
         cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache,new
+        cache-to: type=local,dest=/tmp/.buildx-cache
         file: ${{ inputs.dockerfile }}
         platforms: ${{ inputs.platforms }}
         push: ${{ github.event_name != 'pull_request' || inputs.push_image }}
